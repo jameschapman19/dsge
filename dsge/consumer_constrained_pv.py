@@ -2,7 +2,13 @@ import numpy as np
 from scipy import optimize
 
 
-class ConstrainedConsumer:
+class ConsumerConstrainedPV:
+    """
+    References
+    ----------
+    .. [1] https://mitsloan.mit.edu/shared/ods/documents?DocumentID=4171
+
+    """
     def __init__(self, W=1.0, R=1.0, Beta=0.1, T=10):
         self.W = W
         self.R = R
