@@ -30,7 +30,7 @@ class ConsumerConstrainedPV:
         c : float
             Consumption
         """
-        return np.log(c)
+        return np.log(c+1e-9)
 
     def utility_grad(self, c):
         """
@@ -40,7 +40,7 @@ class ConsumerConstrainedPV:
         c : float
             Consumption
         """
-        return np.log(c+1e-9)
+        return np.log(c)
 
     def euler(self, c):
         """

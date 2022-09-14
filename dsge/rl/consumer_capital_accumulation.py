@@ -12,7 +12,7 @@ class ConsumerCapitalAccumulationRL(ConsumerCapitalAccumulation,gym.Env):
     def step(self, action):
         c=(action[0])
         [k,t]=self.state
-        c = np.clip(c,c, self.output(k)+(1-self.delta)*k)
+        c = np.clip(c,0, self.output(k)+(1-self.delta)*k)
         k = self.output(k) - c + (1 - self.delta) * k
         t+=1
         reward = self.utility(c)
