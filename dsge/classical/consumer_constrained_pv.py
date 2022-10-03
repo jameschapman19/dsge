@@ -1,26 +1,38 @@
 import numpy as np
 from scipy import optimize
 
+from dsge._base import _BaseDSGE
 
-class ConsumerConstrainedPV:
+
+class ConsumerConstrainedPV(_BaseDSGE):
     """
     References
     ----------
     .. [1] https://mitsloan.mit.edu/shared/ods/documents?DocumentID=4171
     """
-    def __init__(self, W=1.0, R=1.0, Beta=0.1, T=10):
+
+    def __init__(self, W=1.0, R=1.0, beta=0.1, T=10):
+        """
+
+        Parameters
+        ----------
+        W: float
+            Wage
+        R: float
+            Interest rate
+        beta: float
+            Discount factor
+        T: int
+            Number of periods
+        """
+        super().__init__(beta,T)
         self.W = W
         self.R = R
-        self.Beta = Beta
-        self.T = T
         self.solution_method = 'ls'
 
     def solve(self):
-        """
-        Solves the constrained consumer problem
-        """
         solution = optimize.least_squares(self.euler, x0=np.ones(self.T), bounds=(0, np.inf))
-        self.c=solution.x
+        self.c = solution.x
 
     def utility(self, c):
         """
@@ -30,7 +42,7 @@ class ConsumerConstrainedPV:
         c : float
             Consumption
         """
-        return np.log(c+1e-9)
+        return np.log(c + 1e-9)
 
     def utility_grad(self, c):
         """
@@ -46,8 +58,13 @@ class ConsumerConstrainedPV:
         """
         Euler equation for consumption
         """
-        euler=self.utility_grad(c[:-1]) - self.Beta*self.R*self.utility_grad(c[1:])
-        Rt=self.R**(1-(np.arange(self.T)+1))
-        budget=np.array([np.dot(c,Rt)-self.W])
+        euler = self.utility_grad(c[:-1]) - self.Beta * self.R * self.utility_grad(c[1:])
+        Rt = self.R ** (1 - (np.arange(self.T) + 1))
+        budget = np.array([np.dot(c, Rt) - self.W])
         return np.concatenate((euler, budget))
 
+
+if __name__ == "__main__":
+    model = ConsumerConstrainedPV()
+    model.solve()
+    print()

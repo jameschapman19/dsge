@@ -1,34 +1,33 @@
 import numpy as np
 from scipy import optimize
 
+from dsge._base import _BaseDSGE
 
-class ConsumerCapitalAccumulation:
-    def __init__(self, A=1.0, Beta=0.5, T=10, delta=0.1, k_init=1.0):
+
+class ConsumerCapitalAccumulation(_BaseDSGE):
+    def __init__(self, A=1.0, beta=0.5, T=10, delta=0.1, K_0=1.0):
         """
         Initializes the capital accumulation consumer problem
+
         References
         ----------
         .. [1] https://mitsloan.mit.edu/shared/ods/documents?DocumentID=4171
+
         Parameters
         ----------
         A :  float
             Total Factor Productivity
-        Beta :
+        beta :
             Time Preference Factor
         T :
             Number of periods
         delta :
             Depreciation rate
-        k1 :
-            Initial capital stock
-        solution_method :
-            Solution method for the constrained problem
         """
+        super().__init__(beta,T)
         self.A = A
-        self.Beta = Beta
-        self.T = T
         self.delta = delta
-        self.k_init = k_init
+        self.K_0 = K_0
 
     def output(self, k):
         """
@@ -56,7 +55,7 @@ class ConsumerCapitalAccumulation:
         x0 = np.concatenate((c0, k0))
         self.solution = optimize.least_squares(self.euler, x0=x0, bounds=(0, np.inf))
         self.c = self.solution.x[: self.T]
-        self.k = np.concatenate((np.array([self.k1]), self.solution.x[self.T :]))
+        self.k = np.concatenate((np.array([self.K_0]), self.solution.x[self.T:]))
 
     def utility(self, c):
         """
@@ -66,7 +65,7 @@ class ConsumerCapitalAccumulation:
         c : float
             Consumption
         """
-        return np.log(c+1e-9)
+        return np.log(c + 1e-9)
 
     def utility_grad(self, c):
         """
@@ -87,9 +86,9 @@ class ConsumerCapitalAccumulation:
             Array of consumption and capital stock
         """
         c = x[: self.T]
-        k = np.concatenate((np.array([self.k_init]), x[self.T :]))
-        consumption_euler = self.utility_grad(c[:-1]) - self.Beta * (
-            1 - self.delta + self.output_grad(k[1:])
+        k = np.concatenate((np.array([self.K_0]), x[self.T:]))
+        consumption_euler = self.utility_grad(c[:-1]) - self.beta * (
+                1 - self.delta + self.output_grad(k[1:])
         ) * self.utility_grad(c[1:])
         capital_euler = k[1:] - self.output(k[:-1]) + c[:-1] - (1 - self.delta) * k[:-1]
         boundary_condition = np.array(
