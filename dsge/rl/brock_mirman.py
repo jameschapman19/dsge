@@ -7,7 +7,7 @@ from dsge.classical.brock_mirman import BrockMirman
 class BrockMirmanRL(BrockMirman, gym.Env):
     """Social Planner"""
 
-    def __init__(self, alpha=0.5, beta=0.5, K_0=1, A_0=1, T=10, G=0.02):
+    def __init__(self, alpha=0.5, beta=0.5, K_0=1, A_0=1, T=10, G=0.02, b=0.5):
         """
 
         Parameters
@@ -25,7 +25,7 @@ class BrockMirmanRL(BrockMirman, gym.Env):
         G: float
             Growth rate of technology
         """
-        super().__init__(alpha=alpha, beta=beta, K_0=K_0, A_0=A_0, T=T, G=G)
+        super().__init__(alpha=alpha, beta=beta, K_0=K_0, A_0=A_0, T=T, G=G, b=b)
         self.action_space = gym.spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32)
         self.l = np.zeros(self.T)

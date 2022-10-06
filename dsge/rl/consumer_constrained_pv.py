@@ -1,11 +1,11 @@
 import gym
 import numpy as np
 
-from dsge.classical.consumer_constrained_pv import ConsumerConstrainedPV
+from dsge.classical.constrained_pv import ConstrainedPV
 
 
-class ConsumerConstrainedPVRL(ConsumerConstrainedPV, gym.Env):
-    def __init__(self, W=1.0, R=0.9, beta=0.1, T=5):
+class ConstrainedPVRL(ConstrainedPV, gym.Env):
+    def __init__(self, W=1.0, R=1, beta=0.1, T=5):
         super().__init__(W=W, R=R, beta=beta, T=T)
         self.action_space = gym.spaces.Box(low=0, high=10.0, shape=(1,), dtype=np.float32)
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
@@ -13,11 +13,11 @@ class ConsumerConstrainedPVRL(ConsumerConstrainedPV, gym.Env):
     def step(self, action):
         c = (action[0])
         [W, t] = self.state
+        c = np.clip(c, 0, W / self.R ** (1 - (t + 1)))
         self.c[t] = c
-        t += 1
-        c = np.clip(c, 0, W / self.R ** (1 - t))
-        W -= self.R ** (1 - t) * c
+        W -= self.R ** (1 - (t + 1)) * c
         reward = self.utility(c)
+        t += 1
         if t >= self.T:
             done = True
         else:
@@ -32,7 +32,7 @@ class ConsumerConstrainedPVRL(ConsumerConstrainedPV, gym.Env):
 
 
 if __name__ == "__main__":
-    env = ConsumerConstrainedPVRL()
+    env = ConstrainedPVRL()
     from stable_baselines3.common.env_checker import check_env
 
     check_env(env)

@@ -1,6 +1,11 @@
-import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 
 from dsge.classical._rbc import _RBC
+
+matplotlib.use('TkAgg')
 
 
 class BrockMirman(_RBC):
@@ -10,7 +15,7 @@ class BrockMirman(_RBC):
     .. [1] https://personal.lse.ac.uk/vernazza/_private/RBC%20Models.pdf
     """
 
-    def __init__(self, alpha=0.5, beta=0.5, K_0=1, A_0=1, T=100, G=0.02, b=0.5):
+    def __init__(self, alpha=0.5, beta=0.5, K_0=1, A_0=1, T=10, G=0.02, b=0.5):
         """
 
         Parameters
@@ -30,8 +35,17 @@ class BrockMirman(_RBC):
         """
         super().__init__(alpha=alpha, beta=beta, T=T, delta=1, A_0=A_0, K_0=K_0, G=G, b=b)
 
-    def render(self, mode="human"):
-        pass
+    def render(self):
+        df = self._history()
+        df = pd.melt(df, id_vars=['time'], value_vars=['capital', 'consumption', 'technology', 'labour'])
+        plt.figure()
+        gfg = sns.lineplot(data=df, x='time', y='value', hue='variable')
+        gfg.set_ylim(bottom=0)
+
+    def _history(self):
+        df = pd.DataFrame(
+            {'time': self.t, 'consumption': self.c, 'capital': self.k, 'technology': self.A, 'labour': self.l})
+        return df
 
     def solve(self):
         """
@@ -51,11 +65,8 @@ class BrockMirman(_RBC):
                 1 - self.delta)  # the interest rate which ensures household assets = capital
         self.w = self.alpha * self.A * (self.k / self.l) ** (1 - self.alpha)
 
-    def total_utility(self, c, l):
-        pv_utility = self.utility(c, l=l) * (self.beta ** self.t)
-        return np.sum(pv_utility)
-
 
 if __name__ == "__main__":
     model = BrockMirman()
     model.solve()
+    print()

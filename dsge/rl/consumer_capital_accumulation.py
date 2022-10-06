@@ -2,10 +2,10 @@ import gym
 import matplotlib.pyplot as plt
 import numpy as np
 
-from dsge.classical.consumer_capital_accumulation import ConsumerCapitalAccumulation
+from dsge.classical.capital_accumulation import CapitalAccumulation
 
 
-class ConsumerCapitalAccumulationRL(ConsumerCapitalAccumulation, gym.Env):
+class CapitalAccumulationRL(CapitalAccumulation, gym.Env):
     def __init__(self, A=1.0, T=10, delta=0.1, K_0=1.0, beta=0.5):
         super().__init__(A=A, T=T, delta=delta, K_0=K_0, beta=beta)
         self.action_space = gym.spaces.Box(low=0, high=10.0, shape=(1,), dtype=np.float32)
@@ -36,7 +36,7 @@ class ConsumerCapitalAccumulationRL(ConsumerCapitalAccumulation, gym.Env):
 
 
 if __name__ == "__main__":
-    env = ConsumerCapitalAccumulationRL()
+    env = CapitalAccumulationRL()
     from stable_baselines3.common.env_checker import check_env
 
     check_env(env)

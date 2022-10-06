@@ -60,7 +60,7 @@ class _RBC(_BaseDSGE):
 
     def render(self):
         df = self._history()
-        df = pd.melt(df, id_vars=['time'], value_vars=['capital', 'consumption'])
+        df = pd.melt(df, id_vars=['time'], value_vars=['capital', 'consumption', 'technology'])
         plt.figure()
         gfg = sns.lineplot(data=df, x='time', y='value', hue='variable')
         gfg.set_ylim(bottom=0)
@@ -86,6 +86,10 @@ class _RBC(_BaseDSGE):
             Leisure
         """
         return np.log(c + 1e-9) + self.b * np.log(1 - l + 1e-9)
+
+    def total_utility(self, c, l=0):
+        pv_utility = self.utility(c, l=l) * (self.beta ** self.t)
+        return np.sum(pv_utility)
 
     def solve(self):
         """
