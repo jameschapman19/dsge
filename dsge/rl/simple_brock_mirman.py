@@ -14,11 +14,13 @@ class SimpleBrockMirmanRL(SimpleBrockMirman, gym.Env):
     def step(self, action):
         C = (action[0])
         [K, A, t] = self.state
-        t += 1
         Y = self.production(A, K)
         C = np.clip(C, 0, Y)
+        self.k[t] = K
+        self.c[t] = C
         reward = self.utility(C)
         K = Y - C
+        t += 1
         if t >= self.T:
             done = True
         else:
@@ -33,7 +35,7 @@ class SimpleBrockMirmanRL(SimpleBrockMirman, gym.Env):
 
 
 if __name__ == "__main__":
-    env = BrockMirmanRL()
+    env = SimpleBrockMirmanRL()
     from stable_baselines3.common.env_checker import check_env
 
     check_env(env)

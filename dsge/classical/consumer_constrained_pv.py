@@ -1,4 +1,7 @@
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 from scipy import optimize
 
 from dsge._base import _BaseDSGE
@@ -28,10 +31,19 @@ class ConsumerConstrainedPV(_BaseDSGE):
         super().__init__(beta, T)
         self.W = W
         self.R = R
+        self.c = np.zeros(self.T)
         self.solution_method = 'ls'
 
-    def render(self, mode="human"):
-        pass
+    def _history(self):
+        df = pd.DataFrame({'time': self.t, 'consumption': self.c})
+        return df
+
+    def render(self):
+        df = self._history()
+        df = pd.melt(df, id_vars=['time'], value_vars=['consumption'])
+        plt.figure()
+        gfg = sns.lineplot(data=df, x='time', y='value', hue='variable')
+        gfg.set_ylim(bottom=0)
 
     def solve(self):
         solution = optimize.least_squares(self.euler, x0=np.ones(self.T), bounds=(0, np.inf))
@@ -47,6 +59,10 @@ class ConsumerConstrainedPV(_BaseDSGE):
         """
         return np.log(c + 1e-9)
 
+    def total_utility(self, c):
+        pv_utility = self.utility(c) * (self.beta ** self.t)
+        return np.sum(pv_utility)
+
     def utility_grad(self, c):
         """
         Gradient of utility function for consumption c
@@ -61,7 +77,7 @@ class ConsumerConstrainedPV(_BaseDSGE):
         """
         Euler equation for consumption
         """
-        euler = self.utility_grad(c[:-1]) - self.Beta * self.R * self.utility_grad(c[1:])
+        euler = self.utility_grad(c[:-1]) - self.beta * self.R * self.utility_grad(c[1:])
         Rt = self.R ** (1 - (np.arange(self.T) + 1))
         budget = np.array([np.dot(c, Rt) - self.W])
         return np.concatenate((euler, budget))
@@ -70,4 +86,3 @@ class ConsumerConstrainedPV(_BaseDSGE):
 if __name__ == "__main__":
     model = ConsumerConstrainedPV()
     model.solve()
-    print()

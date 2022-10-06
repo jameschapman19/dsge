@@ -1,16 +1,14 @@
-import numpy as np
-
-from dsge.classical.rbc import RBC
+from dsge.classical._rbc import _RBC
 
 
-class SimpleBrockMirman(RBC):
+class SimpleBrockMirman(_RBC):
     """
     References
     ----------
     .. [1] http://www.econ2.jhu.edu/people/ccarroll/public/LectureNotes/DSGEModels/BrockMirman/
     """
 
-    def __init__(self, alpha=0.5, beta=0.5, K_0=1, A_0=1, T=10, G=0.02, solution='closed_form'):
+    def __init__(self, alpha=0.5, beta=0.5, K_0=1, A_0=1, T=10, G=0.02):
         """
 
         Parameters
@@ -28,14 +26,7 @@ class SimpleBrockMirman(RBC):
         G: float
             Growth rate of technology
         """
-        super().__init__(alpha=alpha, beta=beta, T=T, delta=1, A_0=A_0, K_0=K_0, G=G)
-        self.solution = solution
-
-    def render(self, mode="human"):
-        pass
-
-    def utility(self, c, **kwargs):
-        return np.log(c + 1e-9)
+        super().__init__(alpha=alpha, beta=beta, T=T, delta=1, A_0=A_0, K_0=K_0, G=G, b=0)
 
     def production(self, A, K, **kwargs):
         return A * K ** self.alpha
@@ -44,20 +35,16 @@ class SimpleBrockMirman(RBC):
         """
         Solves the constrained consumer problem
         """
-        if self.solution == 'closed_form':
-            self.solve_closed_form()
-        else:
-            raise NotImplementedError
+        self.solve_closed_form()
 
     def solve_closed_form(self):
         kappa = 1 - self.alpha * self.beta
         for t in range(1, self.T):
-            self.K[t] = self.alpha * self.beta * self.A[t - 1] * self.K[t - 1] ** self.alpha
-        self.Y[:] = self.A * self.K ** self.alpha
-        self.C[:] = kappa * self.Y
+            self.k[t] = self.alpha * self.beta * self.A[t - 1] * self.k[t - 1] ** self.alpha
+        self.y[:] = self.A * self.k ** self.alpha
+        self.c[:] = kappa * self.y
 
 
 if __name__ == "__main__":
     model = SimpleBrockMirman()
     model.solve()
-    print()

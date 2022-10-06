@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Dict, Any, Optional
 
 import numpy as np
@@ -16,3 +17,14 @@ class _BaseDSGE:
         self.T = T
         self.render_mode = self.render_mode
         self.t = np.arange(self.T)
+
+    @abstractmethod
+    def _history(self):
+        pass
+
+    def utility(self, **args):
+        raise NotImplementedError
+
+    @abstractmethod
+    def total_utility(self, **args):
+        raise NotImplementedError

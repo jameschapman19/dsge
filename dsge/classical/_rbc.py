@@ -1,10 +1,16 @@
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 from scipy import optimize
 
 from dsge._base import _BaseDSGE
 
+matplotlib.use('TkAgg')
 
-class RBC(_BaseDSGE):
+
+class _RBC(_BaseDSGE):
     """
     Real Business Cycle Model
 
@@ -47,9 +53,21 @@ class RBC(_BaseDSGE):
         self.A_0 = A_0
         self.c = np.zeros(self.T)
         self.k = np.zeros(self.T)
+        self.y = np.zeros(self.T)
         self.k[0] = K_0
         self.A = self.A_0 * np.cumprod(np.ones(self.T) * (1 + G)) / (1 + G)
         self.b = b
+
+    def render(self):
+        df = self._history()
+        df = pd.melt(df, id_vars=['time'], value_vars=['capital', 'consumption'])
+        plt.figure()
+        gfg = sns.lineplot(data=df, x='time', y='value', hue='variable')
+        gfg.set_ylim(bottom=0)
+
+    def _history(self):
+        df = pd.DataFrame({'time': self.t, 'consumption': self.c, 'capital': self.k, 'technology': self.A})
+        return df
 
     def production(self, A, K, N=1):
         return K ** (1 - self.alpha) * (A * N) ** self.alpha
@@ -57,7 +75,7 @@ class RBC(_BaseDSGE):
     def capital_accumulation(self, K, Y, C):
         return (1 - self.delta) * K + Y - C
 
-    def utility(self, c, l):
+    def utility(self, c, l=0):
         """
         Utility function for consumption c
         Parameters
@@ -73,13 +91,4 @@ class RBC(_BaseDSGE):
         """
         Solves the constrained consumer problem
         """
-        if self.solution == 'lsq':
-            solution = optimize.least_squares(self.euler, x0=np.ones(self.T), bounds=(0, np.inf))
-        elif self.solution == 'taylor':
-            raise NotImplementedError
-
-
-if __name__ == "__main__":
-    model = RBC()
-    model.solve()
-    print()
+        solution = optimize.least_squares(self.euler, x0=np.ones(self.T), bounds=(0, np.inf))

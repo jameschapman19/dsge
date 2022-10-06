@@ -28,20 +28,24 @@ class BrockMirmanRL(BrockMirman, gym.Env):
         super().__init__(alpha=alpha, beta=beta, K_0=K_0, A_0=A_0, T=T, G=G)
         self.action_space = gym.spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32)
+        self.l = np.zeros(self.T)
 
     def step(self, action):
         spending_rate = action[0]
         l = action[1]
         [K, A, t] = self.state
-        t += 1
         Y = self.production(A, K, l)
         C = Y * spending_rate
         reward = self.utility(C, l)
+        self.l[t] = l
+        self.k[t] = K
+        self.c[t] = C
         K = self.capital_accumulation(K, Y, C)
+        t += 1
         if t == self.T:
             done = True
         else:
-            A=self.A[t]
+            A = self.A[t]
             done = False
         info = {}
         self.state = [K, A, t]

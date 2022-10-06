@@ -13,6 +13,7 @@ class ConsumerConstrainedPVRL(ConsumerConstrainedPV, gym.Env):
     def step(self, action):
         c = (action[0])
         [W, t] = self.state
+        self.c[t] = c
         t += 1
         c = np.clip(c, 0, W / self.R ** (1 - t))
         W -= self.R ** (1 - t) * c

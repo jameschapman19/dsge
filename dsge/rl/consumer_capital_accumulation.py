@@ -6,8 +6,8 @@ from dsge.classical.consumer_capital_accumulation import ConsumerCapitalAccumula
 
 
 class ConsumerCapitalAccumulationRL(ConsumerCapitalAccumulation, gym.Env):
-    def __init__(self, A=1.0, T=10, delta=0.1, K_0=1.0):
-        super().__init__(A=A, T=T, delta=delta, K_0=K_0)
+    def __init__(self, A=1.0, T=10, delta=0.1, K_0=1.0, beta=0.5):
+        super().__init__(A=A, T=T, delta=delta, K_0=K_0, beta=beta)
         self.action_space = gym.spaces.Box(low=0, high=10.0, shape=(1,), dtype=np.float32)
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
@@ -43,12 +43,15 @@ if __name__ == "__main__":
     from stable_baselines3 import PPO
 
     # Define and Train the agent
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta).learn(total_timesteps=1)
+    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta).learn(total_timesteps=50000)
+    dfs = []
     for k in range(10):
         obs = env.reset()
         dones = False
         while not dones:
             action, _states = model.predict(obs)
             obs, rewards, dones, info = env.step(action)
+        df = env._history()
+        print(f"total utility: {env.total_utility(env.c)}")
         env.render()
-    plt.show()
+        plt.show()

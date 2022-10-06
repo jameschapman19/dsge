@@ -37,11 +37,15 @@ class ConsumerCapitalAccumulation(_BaseDSGE):
         self.c = np.zeros(self.T)
         self.k = np.zeros(self.T)
 
+    def _history(self):
+        df = pd.DataFrame({'time': self.t, 'consumption': self.c, 'capital': self.k})
+        return df
+
     def render(self):
-        self.df = pd.DataFrame({'time': self.t, 'consumption': self.c, 'capital': self.k})
-        plot_df = pd.melt(self.df, id_vars=['time'], value_vars=['capital', 'consumption'])
+        df = self._history()
+        df = pd.melt(df, id_vars=['time'], value_vars=['capital', 'consumption'])
         plt.figure()
-        gfg = sns.lineplot(data=plot_df, x='time', y='value', hue='variable')
+        gfg = sns.lineplot(data=df, x='time', y='value', hue='variable')
         gfg.set_ylim(bottom=0)
 
     def output(self, k):
@@ -82,6 +86,10 @@ class ConsumerCapitalAccumulation(_BaseDSGE):
         """
         return np.log(c + 1e-9)
 
+    def total_utility(self, c):
+        pv_utility = self.utility(c) * (self.beta ** self.t)
+        return np.sum(pv_utility)
+
     def utility_grad(self, c):
         """
         Gradient of utility function for consumption c
@@ -115,6 +123,3 @@ class ConsumerCapitalAccumulation(_BaseDSGE):
 if __name__ == "__main__":
     model = ConsumerCapitalAccumulation()
     model.solve()
-    model.render()
-    plt.show()
-    print()
