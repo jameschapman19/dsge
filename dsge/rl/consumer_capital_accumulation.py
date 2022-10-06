@@ -1,4 +1,5 @@
 import gym
+import matplotlib.pyplot as plt
 import numpy as np
 
 from dsge.classical.consumer_capital_accumulation import ConsumerCapitalAccumulation
@@ -14,6 +15,8 @@ class ConsumerCapitalAccumulationRL(ConsumerCapitalAccumulation, gym.Env):
         c = (action[0])
         [k, t] = self.state
         c = np.clip(c, 0, self.output(k) + (1 - self.delta) * k)
+        self.k[t] = k
+        self.c[t] = c
         k = self.output(k) - c + (1 - self.delta) * k
         t += 1
         reward = self.utility(c)
@@ -26,6 +29,8 @@ class ConsumerCapitalAccumulationRL(ConsumerCapitalAccumulation, gym.Env):
         return np.array(self.state, dtype=np.float32), reward.item(), done, info
 
     def reset(self):
+        self.k = np.zeros(self.T)
+        self.c = np.zeros(self.T)
         self.state = [self.K_0, 0]
         return np.array(self.state, dtype=np.float32)
 
@@ -38,10 +43,12 @@ if __name__ == "__main__":
     from stable_baselines3 import PPO
 
     # Define and Train the agent
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/',gamma=env.beta).learn(total_timesteps=20000)
+    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta).learn(total_timesteps=1)
     for k in range(10):
         obs = env.reset()
         dones = False
         while not dones:
             action, _states = model.predict(obs)
             obs, rewards, dones, info = env.step(action)
+        env.render()
+    plt.show()

@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import optimize
 
 from dsge.classical.rbc import RBC
 
@@ -31,6 +30,9 @@ class SimpleBrockMirman(RBC):
         """
         super().__init__(alpha=alpha, beta=beta, T=T, delta=1, A_0=A_0, K_0=K_0, G=G)
         self.solution = solution
+
+    def render(self, mode="human"):
+        pass
 
     def utility(self, c, **kwargs):
         return np.log(c + 1e-9)

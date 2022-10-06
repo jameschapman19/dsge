@@ -4,10 +4,10 @@ import numpy as np
 from dsge.classical.brock_mirman import BrockMirman
 
 
-class BrockMirmanRL(BrockMirman, gym.Env):
+class NKRL(BrockMirman, gym.Env):
     """Social Planner"""
 
-    def __init__(self, alpha=0.5, beta=0.5, K_0=1, A_0=1, T=10, G=0.02):
+    def __init__(self, alpha=0.5, beta=0.5, K_0=1, A_0=1, T=10, G=0.02, stickiness=0.5):
         """
 
         Parameters
@@ -24,36 +24,50 @@ class BrockMirmanRL(BrockMirman, gym.Env):
             Number of periods
         G: float
             Growth rate of technology
+        stickiness: float
+            Probability of each firm being able to change prices
         """
         super().__init__(alpha=alpha, beta=beta, K_0=K_0, A_0=A_0, T=T, G=G)
         self.action_space = gym.spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
-        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
+
+    def labour_demand(self, C, A, K):
+        return ((C / K ** (1 - self.alpha)) ** (1 / (self.alpha))) / A
+
+    def profit(self, Y, W, N, R, K):
+        return Y - W * N - (R - 1 + self.delta) * K
+
+    def intermediary_firm_demand(self, P_i, epsilon_p, Y):
+        return P_i ** (-epsilon_p) * Y
 
     def step(self, action):
+        """
+        Firm takes R and W as given and profit maximises
+        """
+        [P_i, A, t] = self.state
         spending_rate = action[0]
-        l = action[1]
-        [K, A, t] = self.state
+        Y_i = self.intermediary_firm_demand(P_i, action[0])
+        N = self.labour_demand(Y, A, K)
         t += 1
-        Y = self.production(A, K, l)
-        C = Y * spending_rate
-        reward = self.utility(C, l)
-        K = self.capital_accumulation(K, Y, C)
+        W = self.alpha * A ** self.alpha * (K / N) ** (1 - self.alpha)
+        R = (1 - self.alpha) * (A * N / K) ** self.alpha + (1 - self.delta)
+        reward = self.profit(Y, W, N, R, K)
         if t == self.T:
             done = True
         else:
-            A=self.A[t]
+            A = self.A[t]
             done = False
         info = {}
-        self.state = [K, A, t]
+        self.state = [A, t]
         return np.array(self.state, dtype=np.float32), reward.item(), done, info
 
     def reset(self):
-        self.state = [self.K_0, self.A[0], 0]
+        self.state = [self.A[0], 0]
         return np.array(self.state, dtype=np.float32)
 
 
 if __name__ == "__main__":
-    env = BrockMirmanRL()
+    env = BrockMirmanFirmRL()
     from stable_baselines3.common.env_checker import check_env
 
     check_env(env)

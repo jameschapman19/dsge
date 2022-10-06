@@ -1,7 +1,13 @@
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 from scipy import optimize
 
 from dsge._base import _BaseDSGE
+
+matplotlib.use('TkAgg')
 
 
 class ConsumerCapitalAccumulation(_BaseDSGE):
@@ -24,10 +30,19 @@ class ConsumerCapitalAccumulation(_BaseDSGE):
         delta :
             Depreciation rate
         """
-        super().__init__(beta,T)
+        super().__init__(beta, T)
         self.A = A
         self.delta = delta
         self.K_0 = K_0
+        self.c = np.zeros(self.T)
+        self.k = np.zeros(self.T)
+
+    def render(self):
+        self.df = pd.DataFrame({'time': self.t, 'consumption': self.c, 'capital': self.k})
+        plot_df = pd.melt(self.df, id_vars=['time'], value_vars=['capital', 'consumption'])
+        plt.figure()
+        gfg = sns.lineplot(data=plot_df, x='time', y='value', hue='variable')
+        gfg.set_ylim(bottom=0)
 
     def output(self, k):
         """
@@ -100,4 +115,6 @@ class ConsumerCapitalAccumulation(_BaseDSGE):
 if __name__ == "__main__":
     model = ConsumerCapitalAccumulation()
     model.solve()
+    model.render()
+    plt.show()
     print()

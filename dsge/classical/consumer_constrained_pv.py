@@ -25,10 +25,13 @@ class ConsumerConstrainedPV(_BaseDSGE):
         T: int
             Number of periods
         """
-        super().__init__(beta,T)
+        super().__init__(beta, T)
         self.W = W
         self.R = R
         self.solution_method = 'ls'
+
+    def render(self, mode="human"):
+        pass
 
     def solve(self):
         solution = optimize.least_squares(self.euler, x0=np.ones(self.T), bounds=(0, np.inf))

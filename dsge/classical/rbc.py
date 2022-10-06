@@ -13,7 +13,8 @@ class RBC(_BaseDSGE):
     .. [1] https://personal.lse.ac.uk/vernazza/_private/RBC%20Models.pdf
     """
 
-    def __init__(self, alpha=0.5, beta=0.5, delta=0.5, K_0=1, A_0=1, T=10, G=0.02,b=0.5,gamma=0.5, solution='closed_form'):
+    def __init__(self, alpha=0.5, beta=0.5, delta=0.5, K_0=1, A_0=1, T=10, G=0.02, b=0.5, gamma=0.5,
+                 solution='closed_form'):
         """
 
         Parameters
@@ -42,17 +43,16 @@ class RBC(_BaseDSGE):
         self.gamma = gamma
         self.delta = delta
         self.solution = solution
-        self.Y = np.zeros(self.T)
-        self.C = np.zeros(self.T)
-        self.K = np.zeros(self.T)
         self.K_0 = K_0
         self.A_0 = A_0
-        self.K[0] = K_0
-        self.A = self.A_0*np.cumprod(np.ones(self.T) *(1+ G))/(1+G)
-        self.b=b
+        self.c = np.zeros(self.T)
+        self.k = np.zeros(self.T)
+        self.k[0] = K_0
+        self.A = self.A_0 * np.cumprod(np.ones(self.T) * (1 + G)) / (1 + G)
+        self.b = b
 
     def production(self, A, K, N=1):
-        return K ** (1-self.alpha) * (A * N) ** self.alpha
+        return K ** (1 - self.alpha) * (A * N) ** self.alpha
 
     def capital_accumulation(self, K, Y, C):
         return (1 - self.delta) * K + Y - C
@@ -67,7 +67,7 @@ class RBC(_BaseDSGE):
         l : float
             Leisure
         """
-        return np.log(c + 1e-9)+self.b*np.log(1-l+1e-9)
+        return np.log(c + 1e-9) + self.b * np.log(1 - l + 1e-9)
 
     def solve(self):
         """

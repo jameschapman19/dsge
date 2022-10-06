@@ -29,6 +29,9 @@ class BrockMirman(RBC):
         super().__init__(alpha=alpha, beta=beta, T=T, delta=1, A_0=A_0, K_0=K_0, G=G, b=b)
         self.solution = solution
 
+    def render(self, mode="human"):
+        pass
+
     def solve(self):
         """
         Solves the constrained consumer problem
