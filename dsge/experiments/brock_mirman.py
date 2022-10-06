@@ -10,7 +10,7 @@ from dsge.rl import BrockMirmanRL
 
 
 def uncertainty_plot(df):
-    plot_df = pd.melt(df, id_vars=['time', 'run'], value_vars=['capital', 'consumption', 'technology', 'labor'])
+    plot_df = pd.melt(df, id_vars=['time', 'run'], value_vars=['capital', 'consumption', 'technology', 'labour'])
     plt.figure()
     gfg = sns.lineplot(data=plot_df, x='time', y='value', hue='variable')
     gfg.set_ylim(bottom=0)

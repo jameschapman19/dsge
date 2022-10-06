@@ -1,14 +1,15 @@
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from dsge.classical._rbc import _RBC
+from .simple_brock_mirman import SimpleBrockMirman
 
 matplotlib.use('TkAgg')
 
 
-class BrockMirman(_RBC):
+class BrockMirman(SimpleBrockMirman):
     """
     References
     ----------
@@ -33,7 +34,8 @@ class BrockMirman(_RBC):
         G: float
             Growth rate of technology
         """
-        super().__init__(alpha=alpha, beta=beta, T=T, delta=1, A_0=A_0, K_0=K_0, G=G, b=b)
+        super().__init__(alpha=alpha, beta=beta, T=T, A_0=A_0, K_0=K_0, G=G)
+        self.b = b
 
     def render(self):
         df = self._history()
@@ -46,6 +48,25 @@ class BrockMirman(_RBC):
         df = pd.DataFrame(
             {'time': self.t, 'consumption': self.c, 'capital': self.k, 'technology': self.A, 'labour': self.l})
         return df
+
+    def production(self, A, K, N=1):
+        return K ** (1 - self.alpha) * (A * N) ** self.alpha
+
+    def utility(self, c, l):
+        """
+        Utility function for consumption c
+        Parameters
+        ----------
+        c : float
+            Consumption
+        l : float
+            Leisure
+        """
+        return np.log(c + 1e-9) + self.b * np.log(1 - l + 1e-9)
+
+    def total_utility(self, c, l):
+        pv_utility = self.utility(c, l) * (self.beta ** self.t)
+        return np.sum(pv_utility)
 
     def solve(self):
         """
