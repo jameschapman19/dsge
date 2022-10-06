@@ -5,8 +5,8 @@ from dsge.classical.constrained_pv import ConstrainedPV
 
 
 class ConstrainedPVRL(ConstrainedPV, gym.Env):
-    def __init__(self, W=1.0, R=1, beta=0.1, T=5):
-        super().__init__(W=W, R=R, beta=beta, T=T)
+    def __init__(self, W=1.0, R=1.0, beta=0.9, T=10, eps=1e-3):
+        super().__init__(W=W, R=R, beta=beta, T=T, eps=eps)
         self.action_space = gym.spaces.Box(low=0, high=10.0, shape=(1,), dtype=np.float32)
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 

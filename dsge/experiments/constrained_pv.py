@@ -16,7 +16,7 @@ def uncertainty_plot(df):
     gfg.set_ylim(bottom=0)
 
 
-def train(env, model_name='constrained_pv_demo', total_timesteps=100000):
+def train(env, model_name='constrained_pv_demo', total_timesteps=400000):
     model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta, seed=42).learn(
         total_timesteps=total_timesteps)
     model.save(model_name)

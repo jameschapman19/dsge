@@ -14,7 +14,7 @@ class ConstrainedPV(_BaseDSGE):
     .. [1] https://mitsloan.mit.edu/shared/ods/documents?DocumentID=4171
     """
 
-    def __init__(self, W=1.0, R=1.0, beta=0.1, T=10, eps=1e-3):
+    def __init__(self, W=1.0, R=1.0, beta=0.9, T=10, eps=1e-3):
         """
 
         Parameters
@@ -92,4 +92,4 @@ class ConstrainedPV(_BaseDSGE):
 if __name__ == "__main__":
     model = ConstrainedPV()
     model.solve()
-    print()
+    print(model.total_utility(model.c))
