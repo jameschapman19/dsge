@@ -16,7 +16,7 @@ def uncertainty_plot(df):
     gfg.set_ylim(bottom=0)
 
 
-def train(env, model_name='constrained_pv_demo', total_timesteps=400000):
+def train(env, model_name='constrained_pv_highdr', total_timesteps=100000):
     model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta, seed=42).learn(
         total_timesteps=total_timesteps)
     model.save(model_name)
@@ -33,7 +33,7 @@ def run_model(env, model):
     return df
 
 
-def evaluate_rl(env, runs=10, model_name='constrained_pv_demo'):
+def evaluate_rl(env, runs=10, model_name='constrained_pv_highdr'):
     model = PPO.load(model_name, env=env)
     dfs = []
     for i in range(runs):
@@ -50,8 +50,9 @@ def evaluate_classical(env):
     env.render()
 
 
-def main(retrain=False, model_name='constrained_pv_demo', **kwargs):
-    env = ConstrainedPVRL(**kwargs)
+def main(retrain=False, model_name='constrained_pv_highdr', **kwargs):
+    beta = 0.5
+    env = ConstrainedPVRL(beta=0.5)
     if retrain:
         train(env, model_name=model_name)
     else:
@@ -59,7 +60,7 @@ def main(retrain=False, model_name='constrained_pv_demo', **kwargs):
             train(env, model_name=model_name)
     evaluate_rl(env, runs=10)
     plt.savefig('constrained_pv_rl.png')
-    classical = ConstrainedPV(**kwargs)
+    classical = ConstrainedPV(beta=0.5)
     evaluate_classical(classical)
     plt.savefig('constrained_pv_classical.png')
     plt.show(block=True)
