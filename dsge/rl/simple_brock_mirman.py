@@ -20,11 +20,7 @@ class SimpleBrockMirmanRL(SimpleBrockMirman, gym.Env):
         self.c[t] = C
         reward = self.utility(C)
         K = Y - C
-        t += 1
-        if t >= self.T:
-            done = True
-        else:
-            done = False
+        t, done = self.step_time(t)
         info = {}
         self.state = [K, A, t]
         return np.array(self.state, dtype=np.float32), reward.item(), done, info

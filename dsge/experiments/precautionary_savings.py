@@ -5,18 +5,17 @@ import pandas as pd
 import seaborn as sns
 from stable_baselines3 import PPO
 
-from dsge.classical.constrained_pv import ConstrainedPV
-from dsge.rl import ConstrainedPVRL
+from dsge.rl import PrecautionarySavingsRL
 
 
 def uncertainty_plot(df):
-    plot_df = pd.melt(df, id_vars=['time', 'run'], value_vars=['consumption'])
+    plot_df = pd.melt(df, id_vars=['time', 'run'], value_vars=['consumption', 'wage', 'savings'])
     plt.figure()
     gfg = sns.lineplot(data=plot_df, x='time', y='value', hue='variable')
     gfg.set_ylim(bottom=0)
 
 
-def train(env, model_name='constrained_pv_highdr', total_timesteps=50000):
+def train(env, model_name='precautionary_savings', total_timesteps=100000):
     model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta, seed=42).learn(
         total_timesteps=total_timesteps)
     model.save(model_name)
@@ -28,12 +27,12 @@ def run_model(env, model):
     while not dones:
         action, _states = model.predict(obs)
         obs, rewards, dones, info = env.step(action)
-    df = env.history
+    df = env._history()
     print(f"RL utility: {env.total_utility(env.c)}")
     return df
 
 
-def evaluate_rl(env, runs=10, model_name='constrained_pv_highdr'):
+def evaluate_rl(env, runs=10, model_name='precautionary_savings'):
     model = PPO.load(model_name, env=env)
     dfs = []
     for i in range(runs):
@@ -50,19 +49,15 @@ def evaluate_classical(env):
     env.render()
 
 
-def main(retrain=False, model_name='constrained_pv_highdr', **kwargs):
-    beta = 0.5
-    env = ConstrainedPVRL(beta=beta)
+def main(retrain=False, model_name='precautionary_savings', **kwargs):
+    env = PrecautionarySavingsRL(beta=0.99)
     if retrain:
         train(env, model_name=model_name)
     else:
         if not exists(f"{model_name}.zip"):
             train(env, model_name=model_name)
     evaluate_rl(env, runs=10)
-    plt.savefig('constrained_pv_rl.png')
-    classical = ConstrainedPV(beta=beta)
-    evaluate_classical(classical)
-    plt.savefig('constrained_pv_classical.png')
+    plt.savefig('precautionary_savings_rl.png')
     plt.show(block=True)
 
 

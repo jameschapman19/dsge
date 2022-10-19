@@ -41,12 +41,8 @@ class BrockMirmanRL(BrockMirman, gym.Env):
         self.k[t] = K
         self.c[t] = C
         K = self.capital_accumulation(K, Y, C)
-        t += 1
-        if t == self.T:
-            done = True
-        else:
-            A = self.A[t]
-            done = False
+        t, done = self.step_time(t)
+        A = self.A[t]
         info = {}
         self.state = [K, A, t]
         return np.array(self.state, dtype=np.float32), reward.item(), done, info

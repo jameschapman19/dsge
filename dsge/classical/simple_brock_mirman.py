@@ -44,15 +44,16 @@ class SimpleBrockMirman(_BaseDSGE):
         self.delta = 1  # assumption of Brock-Mirman
 
     def render(self):
-        df = self._history()
+        df = self.history
         df = pd.melt(df, id_vars=['time'], value_vars=['capital', 'consumption', 'technology', 'labour'])
         plt.figure()
         gfg = sns.lineplot(data=df, x='time', y='value', hue='variable')
         gfg.set_ylim(bottom=0)
 
-    def _history(self):
+    @property
+    def history(self):
         df = pd.DataFrame(
-            {'time': self.t, 'consumption': self.c, 'capital': self.k, 'technology': self.A, 'labour': self.l})
+            {'time': self.time, 'consumption': self.c, 'capital': self.k, 'technology': self.A, 'labour': self.l})
         return df
 
     def capital_accumulation(self, K, Y, C):
@@ -72,16 +73,10 @@ class SimpleBrockMirman(_BaseDSGE):
         return np.log(c + 1e-9)
 
     def total_utility(self, c, **args):
-        pv_utility = self.utility(c) * (self.beta ** self.t)
+        pv_utility = self.utility(c) * (self.beta ** self.time)
         return np.sum(pv_utility)
 
     def solve(self):
-        """
-        Solves the constrained consumer problem
-        """
-        self.solve_closed_form()
-
-    def solve_closed_form(self):
         kappa = 1 - self.alpha * self.beta
         for t in range(1, self.T):
             self.k[t] = self.alpha * self.beta * self.A[t - 1] * self.k[t - 1] ** self.alpha

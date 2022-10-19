@@ -15,18 +15,17 @@ class CapitalAccumulationRL(CapitalAccumulation, gym.Env):
         c = (action[0])
         [k, t] = self.state
         c = np.clip(c, 0, self.output(k) + (1 - self.delta) * k)
-        self.k[t] = k
-        self.c[t] = c
-        k = self.output(k) - c + (1 - self.delta) * k
-        t += 1
         reward = self.utility(c)
-        if t >= self.T:
-            done = True
-        else:
-            done = False
+        k_ = self.model_step(k, c)
+        self.state = self.store(t, k_, c)
+        t, done = self.step_time(t)
         info = {}
         self.state = [k.item(), t]
         return np.array(self.state, dtype=np.float32), reward.item(), done, info
+
+    def store(self, t, k, c):
+        self.k[t] = k
+        self.c[t] = c
 
     def reset(self):
         self.k = np.zeros(self.T)

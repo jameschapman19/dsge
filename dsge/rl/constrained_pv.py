@@ -12,19 +12,19 @@ class ConstrainedPVRL(ConstrainedPV, gym.Env):
 
     def step(self, action):
         c = (action[0])
-        [W, t] = self.state
-        c = np.clip(c, 0, W / self.R ** (1 - (t + 1)))
-        self.c[t] = c
-        W -= self.R ** (1 - (t + 1)) * c
+        [w, t] = self.state
+        c = np.clip(c, 0, w / self.R ** (1 - (t + 1)))
         reward = self.utility(c)
-        t += 1
-        if t >= self.T:
-            done = True
-        else:
-            done = False
+        w_ = self.model_step(t, w, c)
+        self.store(t, c, w)
+        t, done = self.step_time(t)
         info = {}
-        self.state = [W, t]
+        self.state = [w_, t]
         return np.array(self.state, dtype=np.float32), reward.item(), done, info
+
+    def store(self, t, c, w):
+        self.c[t] = c
+        self.w[t] = w
 
     def reset(self):
         self.state = [self.W, 0]
