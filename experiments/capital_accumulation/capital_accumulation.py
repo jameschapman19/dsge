@@ -16,7 +16,7 @@ def uncertainty_plot(df):
     gfg.set_ylim(bottom=0)
 
 
-def train(env, model_name='capital_accumulation_demo', total_timesteps=200000):
+def train(env, model_name='capital_accumulation_demo', total_timesteps=1):
     model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta, seed=42).learn(
         total_timesteps=total_timesteps)
     model.save(model_name)
@@ -28,7 +28,7 @@ def run_model(env, model):
     while not dones:
         action, _states = model.predict(obs)
         obs, rewards, dones, info = env.step(action)
-    df = env._history()
+    df = env.history
     print(f"total utility: {env.total_utility(env.c)}")
     return df
 

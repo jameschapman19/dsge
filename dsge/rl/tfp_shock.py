@@ -7,7 +7,7 @@ from dsge.classical.tfp_shock import TFPShock
 class TFPShockRL(TFPShock, gym.Env):
     """Social Planner"""
 
-    def __init__(self, beta=0.96, T=30, alpha=0.35, delta=0.06, rho=0.8, A_0=1.01, A_eps=0, A_bar=1):
+    def __init__(self, beta=0.96, T=30, alpha=0.35, delta=0.06, rho=0.8, A_0=1.05, A_bar=1, A_eps=0):
         super().__init__(beta=beta, T=T, alpha=alpha, delta=delta, rho=rho, A_0=A_0, A_eps=A_eps, A_bar=A_bar)
         self.action_space = gym.spaces.Box(low=0, high=1.0, shape=(1,), dtype=np.float32)
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
@@ -44,20 +44,11 @@ class TFPShockRL(TFPShock, gym.Env):
 
 
 if __name__ == "__main__":
-    env = TFPShockRL(T=100)
+    env = TFPShockRL(T=30)
     from stable_baselines3.common.env_checker import check_env
 
     check_env(env)
     from stable_baselines3 import PPO
 
     # Define and Train the agent
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta).learn(total_timesteps=50000)
-    obs = env.reset()
-    dones = False
-    while not dones:
-        action, _states = model.predict(obs)
-        obs, rewards, dones, info = env.step(action)
-    env.render()
-    import matplotlib.pyplot as plt
-
-    plt.show()
+    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta).learn(total_timesteps=100000)

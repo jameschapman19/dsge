@@ -27,28 +27,32 @@ class BrockMirmanRL(BrockMirman, gym.Env):
         """
         super().__init__(alpha=alpha, beta=beta, K_0=K_0, A_0=A_0, T=T, G=G, b=b)
         self.action_space = gym.spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
-        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32)
-        self.l = np.zeros(self.T)
+        self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
     def step(self, action):
-        spending_rate = action[0]
-        l = action[1]
-        [K, A, t] = self.state
-        Y = self.production(A, K, l)
-        C = Y * spending_rate
-        reward = self.utility(C, l)
-        self.l[t] = l
-        self.k[t] = K
-        self.c[t] = C
-        K = self.capital_accumulation(K, Y, C)
-        t, done = self.step_time(t)
-        A = self.A[t]
+        spending_rate, l = action[0], action[1]
+        [k, a] = self.state
+        y = self.production(a, k, N=l)
+        c = y * spending_rate
+        reward = self.utility(c, l)
+        self.store(y, c, l, k)
+        k = y * (1 - spending_rate)
+        done = self.step_time()
+        if not done:
+            a = self.A[self.t]
+            self.state = [k, a]
         info = {}
-        self.state = [K, A, t]
         return np.array(self.state, dtype=np.float32), reward.item(), done, info
 
+    def store(self, y, c, l, k):
+        self.y[self.t] = y
+        self.c[self.t] = c
+        self.l[self.t] = l
+        self.k[self.t] = k
+
     def reset(self):
-        self.state = [self.K_0, self.A[0], 0]
+        self.t = 0
+        self.state = [self.K_0, self.A[0]]
         return np.array(self.state, dtype=np.float32)
 
 
@@ -60,10 +64,4 @@ if __name__ == "__main__":
     from stable_baselines3 import PPO
 
     # Define and Train the agent
-    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta).learn(total_timesteps=200000)
-    for k in range(10):
-        obs = env.reset()
-        dones = False
-        while not dones:
-            action, _states = model.predict(obs)
-            obs, rewards, dones, info = env.step(action)
+    model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta).learn(total_timesteps=100000)

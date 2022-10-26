@@ -20,14 +20,20 @@ class PrecautionarySavings(_BaseDSGE):
 
         Parameters
         ----------
-        W: float
-            Wage
-        R: float
-            Interest rate
-        beta: float
+        W_0 : float
+            Initial wage
+        beta : float
             Discount factor
-        T: int
+        T : int
             Number of periods
+        T_shock : int
+            Period of shock
+        W_shock : float
+            Shock to wage
+        eps : float
+            Small number to avoid log(0)
+        solver : str
+            Solver to use. Either 'ls' for least squares or 'min' for minimize
         """
         super().__init__(beta, T)
         self.W_0 = W_0
@@ -43,7 +49,7 @@ class PrecautionarySavings(_BaseDSGE):
 
     @property
     def history(self):
-        df = pd.DataFrame({'time': self.time, 'consumption': self.c, 'wage': self.W, 'savings': self.S})
+        df = pd.DataFrame({'time': self.time, 'consumption': self.c, 'wage': self.w, 'savings': self.s})
         return df
 
     def render(self):
@@ -52,15 +58,6 @@ class PrecautionarySavings(_BaseDSGE):
         plt.figure()
         gfg = sns.lineplot(data=df, x='time', y='value', hue='variable')
         gfg.set_ylim(bottom=0)
-
-    def solve(self):
-        if self.solution == 'ls':
-            self.solve_least_squares()
-        elif self.solution == 'min':
-            self.solve_minimize()
-
-    def solve_least_squares(self):
-        raise NotImplementedError
 
     def solve_minimize(self):
         def negative_total_utility(c):
@@ -109,7 +106,7 @@ class PrecautionarySavings(_BaseDSGE):
 
 
 if __name__ == "__main__":
-    model = PrecautionarySavings()
+    model = PrecautionarySavings(solver='ls')
     model.solve()
     print(model.total_utility(model.c))
     model.render()

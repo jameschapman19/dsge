@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import Dict, Any, Optional
 
 import numpy as np
@@ -23,14 +22,12 @@ class _BaseDSGE:
         self.solver = solver
 
     @property
-    @abstractmethod
     def history(self):
-        pass
+        raise NotImplementedError
 
     def utility(self, **args):
         raise NotImplementedError
 
-    @abstractmethod
     def total_utility(self, **args):
         raise NotImplementedError
 
@@ -39,14 +36,17 @@ class _BaseDSGE:
             self.solve_least_squares()
         elif self.solver == 'min':
             self.solve_minimize()
+        elif self.solver == 'closed form':
+            self.solve_closed_form()
         else:
             raise ValueError('Solver not recognized')
 
-    @abstractmethod
     def solve_least_squares(self):
         raise NotImplementedError
 
-    @abstractmethod
+    def solve_closed_form(self):
+        raise NotImplementedError
+
     def solve_minimize(self):
         raise NotImplementedError
 

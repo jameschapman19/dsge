@@ -14,7 +14,7 @@ from dsge._base import _BaseDSGE
 
 
 class CapitalAccumulation(_BaseDSGE):
-    def __init__(self, A=1.0, T=10, delta=0.1, K_0=1.0, beta=0.9, solver='ls'):
+    def __init__(self, A=1.0, T=10, delta=0.1, K_0=1.0, beta=0.9, solver='ls', eps=1e-9):
         """
         Initializes the capital accumulation consumer problem
 
@@ -39,6 +39,7 @@ class CapitalAccumulation(_BaseDSGE):
         self.K_0 = K_0
         self.c = np.ones(self.T)
         self.k = np.zeros(self.T)
+        self.eps = eps
 
     @property
     def history(self):
@@ -121,7 +122,7 @@ class CapitalAccumulation(_BaseDSGE):
         c : float
             Consumption
         """
-        return jnp.log(c)
+        return jnp.log(c + self.eps)
 
     def total_utility(self, c):
         pv_utility = self.utility(c) * (self.beta ** self.time)

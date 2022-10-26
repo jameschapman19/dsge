@@ -40,9 +40,3 @@ if __name__ == "__main__":
 
     # Define and Train the agent
     model = PPO("MlpPolicy", env, verbose=1, tensorboard_log='./log/', gamma=env.beta).learn(total_timesteps=100000)
-    for k in range(10):
-        obs = env.reset()
-        dones = False
-        while not dones:
-            action, _states = model.predict(obs)
-            obs, rewards, dones, info = env.step(action)
