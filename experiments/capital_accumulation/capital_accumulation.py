@@ -50,19 +50,18 @@ def evaluate_classical(env):
     env.render()
 
 
-def main(retrain=False, model_name='capital_accumulation_demo', **kwargs):
-    env = CapitalAccumulationRL(**kwargs)
+def main(retrain=False, model_name='capital_accumulation_demo', train_timesteps=100000):
+    env = CapitalAccumulationRL()
     if retrain:
-        train(env, model_name=model_name)
+        train(env, model_name=model_name, total_timesteps=train_timesteps)
     else:
         if not exists(f"{model_name}.zip"):
-            train(env, model_name=model_name)
+            train(env, model_name=model_name, total_timesteps=train_timesteps)
     evaluate_rl(env, runs=10)
     plt.savefig('capital_accumulation.png')
-    classical = CapitalAccumulation(**kwargs)
+    classical = CapitalAccumulation()
     evaluate_classical(classical)
     plt.savefig('capital_accumulation_classical.png')
-    plt.show(block=True)
 
 
 if __name__ == '__main__':

@@ -60,11 +60,29 @@ class BrockMirman(_BaseDSGE):
         return df
 
     def production(self, A, K, N=1):
+        """
+        Cobb-Douglas production function
+
+        Parameters
+        ----------
+        A : float
+            Technology level
+        K : float
+            Capital stock
+        N : float
+            Labour
+
+        Returns
+        -------
+        Y : float
+            Output
+        """
         return K ** (1 - self.alpha) * (A * N) ** self.alpha
 
     def utility(self, c, l):
         """
-        Utility function for consumption c
+        Utility function
+
         Parameters
         ----------
         c : float

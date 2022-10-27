@@ -50,11 +50,11 @@ def evaluate_classical(env):
     env.render()
 
 
-def main(retrain=False, model_name='constrained_pv_highdr', **kwargs):
+def main(retrain=False, model_name='constrained_pv_highdr', time_steps=50000):
     beta = 0.5
     env = ConstrainedPVRL(beta=beta)
     if retrain:
-        train(env, model_name=model_name)
+        train(env, model_name=model_name, total_timesteps=time_steps)
     else:
         if not exists(f"{model_name}.zip"):
             train(env, model_name=model_name)

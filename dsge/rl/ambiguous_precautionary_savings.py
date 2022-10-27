@@ -6,9 +6,9 @@ from dsge.classical.precautionary_savings import PrecautionarySavings
 
 
 class AmbiguousPrecautionarySavingsRL(PrecautionarySavings, gym.Env):
-    def __init__(self, W_0=1.0, beta=0.9, T=10, T_shock=5, W_shock=0.5, eps=1e-3):
-        super().__init__(W_0=W_0, beta=beta, T=T, T_shock=T_shock, W_shock=W_shock, eps=eps)
-        self.action_space = gym.spaces.Box(low=0, high=10.0, shape=(2,), dtype=np.float32)
+    def __init__(self, W_0=1.0, beta=0.9, T=10, W_shock=0.5, eps=1e-3):
+        super().__init__(W_0=W_0, beta=beta, T=T, W_shock=W_shock, eps=eps)
+        self.action_space = gym.spaces.Box(low=0, high=1.0, shape=(2,), dtype=np.float32)
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
 
     def step(self, action):
@@ -16,18 +16,21 @@ class AmbiguousPrecautionarySavingsRL(PrecautionarySavings, gym.Env):
         [s, w] = self.state
         c *= s + w * n
         reward = self.utility(c)
-        s = self.model_step(c, s, w)
+        s, w = self.model_step(c, s, w)
         self.state = self.store(c, s, w)
         done = self.step_time()
-        if not done:
-            w = self.w[self.t]
         info = {}
         self.state = [s, w]
         return np.array(self.state, dtype=np.float32), reward.item(), done, info
 
     def model_step(self, c, s, w):
         s_ = s + w - c
-        return s_
+        if self.t == self.T_shock:
+            self.shocked = True
+            w_ = self.W_shock
+        else:
+            w_ = w
+        return s_, w_
 
     def model(self, c):
         for t in range(1, self.T):
@@ -40,6 +43,7 @@ class AmbiguousPrecautionarySavingsRL(PrecautionarySavings, gym.Env):
         return [s, w]
 
     def reset(self):
+        self.T_shock = np.random.randint(1, self.T)
         self.t = 0
         self.state = [0, self.W_0]
         return np.array(self.state, dtype=np.float32)
