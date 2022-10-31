@@ -54,14 +54,13 @@ def evaluate_classical(env):
     env.render()
 
 
-def main(retrain=False, model_name='precautionary_savings', time_steps=100000):
-    env = AmbiguousPrecautionarySavingsRL(beta=0.99)
+def main(retrain=False, model_name='precautionary_savings', time_steps=150000):
+    env = AmbiguousPrecautionarySavingsRL()
     if retrain:
         train(env, model_name=model_name, total_timesteps=time_steps)
     else:
         if not exists(f"{model_name}.zip"):
             train(env, model_name=model_name)
-    env = PrecautionarySavingsRL(beta=0.99)
     evaluate_rl(T=10)
     plt.savefig('precautionary_savings_rl.png')
     plt.show(block=True)

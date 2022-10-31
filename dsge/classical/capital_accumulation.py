@@ -26,12 +26,16 @@ class CapitalAccumulation(_BaseDSGE):
         ----------
         A :  float
             Total Factor Productivity
-        beta :
+        beta : float
             Time Preference Factor
-        T :
+        T : int
             Number of periods
-        delta :
+        delta : float
             Depreciation rate
+        K_0 : float
+            Initial capital stock
+        solver : str
+            Solver to use for the model
         """
         super().__init__(beta, T, solver=solver)
         self.A = A

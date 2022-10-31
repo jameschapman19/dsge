@@ -31,6 +31,14 @@ class TFPShock(_BaseDSGE):
             Depreciation rate
         rho: float
             Persistence of TFP shock
+        A_0: float
+            Initial TFP
+        A_bar: float
+            Steady state TFP
+        A_eps: float
+            Standard deviation of TFP shock
+        solver: str
+            Solver to use
         """
         super().__init__(beta, T, solver=solver)
         self.rho = rho
@@ -39,11 +47,12 @@ class TFPShock(_BaseDSGE):
         self.A_bar = A_bar
         self.A_eps = A_eps
         self.A_0 = A_0
-        self.R_bar = (1 - beta + beta * delta) / beta
-        self.K_bar = ((1 - beta + beta * delta) / (alpha * self.A_bar * beta)) ** (1 / (alpha - 1))
-        self.Y_bar = self.A_bar * self.K_bar ** alpha
-        self.I_bar = self.delta * self.K_bar
-        self.C_bar = self.Y_bar - self.I_bar
+        self.R_bar = (1 - beta + beta * delta) / beta  # steady state interest rate
+        self.K_bar = ((1 - beta + beta * delta) / (alpha * self.A_bar * beta)) ** (
+                    1 / (alpha - 1))  # steady state capital
+        self.Y_bar = self.A_bar * self.K_bar ** alpha  # steady state output
+        self.I_bar = self.delta * self.K_bar  # steady state investment
+        self.C_bar = self.Y_bar - self.I_bar  # steady state consumption
         self.k = np.zeros(self.T)
         self.i = np.zeros(self.T)
         self.y = np.zeros(self.T)
@@ -89,10 +98,6 @@ class TFPShock(_BaseDSGE):
     def production(self, k, A):
         """
         Production function
-        Parameters
-        ----------
-        k : array_like
-            Array of capital stock
         """
         if k > 0:
             return A * k ** self.alpha
@@ -100,9 +105,15 @@ class TFPShock(_BaseDSGE):
             return 0
 
     def capital_growth(self, I, K):
+        """
+        Capital growth function
+        """
         return I + (1 - self.delta) * K
 
     def investment(self, Y, C):
+        """
+        Investment function
+        """
         return Y - C
 
     def model_step(self, y, i, k, c, a):
@@ -122,10 +133,6 @@ class TFPShock(_BaseDSGE):
     def utility(self, c):
         """
         Utility function for consumption c
-        Parameters
-        ----------
-        c : float
-            Consumption
         """
         return jnp.log(c + 1e-9)
 

@@ -13,10 +13,10 @@ class ConstrainedPVRL(ConstrainedPV, gym.Env):
     def step(self, action):
         c = (action[0])
         [w] = self.state
-        c *= w / self.R ** (1 - (self.t + 1))
-        reward = self.utility(c)
-        self.store(c, w)
-        w = self.model_step(self.t, w, c)
+        c *= w / self.R ** (1 - (self.t + 1))  # normalize consumption
+        reward = self.utility(c)  # utility of consumption
+        self.store(c, w)  # store consumption and wage
+        w = self.model_step(self.t, w, c)  # update wage
         done = self.step_time()
         info = {}
         self.state = [w]

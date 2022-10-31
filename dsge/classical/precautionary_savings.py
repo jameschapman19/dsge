@@ -35,13 +35,12 @@ class PrecautionarySavings(_BaseDSGE):
         solver : str
             Solver to use. Either 'ls' for least squares or 'min' for minimize
         """
-        super().__init__(beta, T)
+        super().__init__(beta, T, solver=solver)
         self.W_0 = W_0
         self.T_shock = T_shock
         self.W_shock = W_shock
         self.eps = eps
         self.history_vars = ['consumption', 'wage', 'savings']
-        self.solution = solver
         self.c = np.zeros(self.T)
         self.s = np.zeros(self.T)
         self.w = np.ones(self.T) * self.W_0
@@ -73,7 +72,7 @@ class PrecautionarySavings(_BaseDSGE):
 
         def constraint(c):
             self.model(c)
-            s_final = self.model_step(c[-1], self.s[-1], self.w[-1])
+            s_final, _ = self.model_step(c[-1], self.s[-1], self.w[-1])
             s_all = np.insert(self.s, 0, s_final)
             return s_all
 
@@ -98,15 +97,21 @@ class PrecautionarySavings(_BaseDSGE):
 
     def model_step(self, c, s, w):
         s_ = s + w - c
-        return s_
+        if self.t == (self.T_shock):
+            w_ = self.W_shock
+        else:
+            w_ = w
+        return s_, w_
 
     def model(self, c):
+        self.t = 1
         for t in range(1, self.T):
-            self.s[t] = self.model_step(c[t - 1], self.s[t - 1], self.w[t])
+            self.s[t], self.w[t] = self.model_step(c[t - 1], self.s[t - 1], self.w[t - 1])
+            self.t += 1
 
 
 if __name__ == "__main__":
-    model = PrecautionarySavings(solver='ls')
+    model = PrecautionarySavings()
     model.solve()
     print(model.total_utility(model.c))
     model.render()

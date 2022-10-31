@@ -30,6 +30,8 @@ class BrockMirman(_BaseDSGE):
             Number of periods
         G: float
             Growth rate of technology
+        b: float
+            Utility parameter
         """
         super().__init__(beta, T, solver=solver)
         self.alpha = alpha
@@ -62,33 +64,12 @@ class BrockMirman(_BaseDSGE):
     def production(self, A, K, N=1):
         """
         Cobb-Douglas production function
-
-        Parameters
-        ----------
-        A : float
-            Technology level
-        K : float
-            Capital stock
-        N : float
-            Labour
-
-        Returns
-        -------
-        Y : float
-            Output
         """
         return K ** (1 - self.alpha) * (A * N) ** self.alpha
 
     def utility(self, c, l):
         """
-        Utility function
-
-        Parameters
-        ----------
-        c : float
-            Consumption
-        l : float
-            Leisure
+        Utility function of consumption and leisure
         """
         return np.log(c + 1e-9) + self.b * np.log(1 - l + 1e-9)
 

@@ -49,8 +49,8 @@ def evaluate_classical(env):
     env.render()
 
 
-def main(retrain=False, model_name='precautionary_savings', time_steps=100000):
-    env = PrecautionarySavingsRL(beta=0.99)
+def main(retrain=False, model_name='precautionary_savings', time_steps=150000):
+    env = PrecautionarySavingsRL()
     if retrain:
         train(env, model_name=model_name, total_timesteps=time_steps)
     else:

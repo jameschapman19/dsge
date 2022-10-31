@@ -93,10 +93,6 @@ class ConstrainedPV(_BaseDSGE):
     def utility(self, c):
         """
         Utility function for consumption c
-        Parameters
-        ----------
-        c : float
-            Consumption
         """
         return jnp.log(c + self.eps)
 
